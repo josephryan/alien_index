@@ -1,0 +1,149 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings; 
+use Getopt::Long;
+use Pod::Usage;
+use Data::Dumper;
+
+# algorithm is based on alogorithm described in the following:
+#  Gladyshev, Eugene A., Matthew Meselson, and Irina R. Arkhipova.
+#  "Massive horizontal gene transfer in bdelloid rotifers."
+#  science 320.5880 (2008): 1210-1213.
+
+# current prefixes in superblast.fa are:
+# arch, aq, bact, hm, meta, ml, nv, ta, nm_euk
+# arch = archae
+# bact = bacteria
+# nm_euk = non-metazoan eukaryote
+# meta = metazoan (includes Drosophila melanogaster, Mus musculus,  Homo sapiens, Anopholes gambiae, and more) 
+# aq = Amphimedon queenslandica (Metazoa, Porifera)
+# hm = Hydra magnipapillata (Metazoa, Cnidaria)
+# ml = Mnemiopsis leidyi (Metazoa, Ctenophora)
+# nv = Nematostella vectensis (Metazoa, Cnidaria)
+# ta = Trichoplax adhaerens (Metazoa, Placozoa)
+
+our $VERSION = 0.02;
+our $AUTHOR  = 'Joseph F. Ryan <joseph.ryan@whitney.ufl.edu>';
+
+MAIN: {
+    my $rh_opts  = process_options();
+    my $rh_blast = get_blast($rh_opts->{'blast'});
+    my $rh_ai    = get_alien_indices($rh_blast);
+    print_sorted_ai($rh_ai);
+}
+
+sub print_sorted_ai {
+    my $rh_ai = shift;
+    foreach my $id (sort {$rh_ai->{$b} <=> $rh_ai->{$a}} 
+                    keys %{$rh_ai}) {
+        print "$id: $rh_ai->{$id}\n";
+    }
+}
+
+sub get_alien_indices {
+    my $rh_bl = shift;
+    my %ai_indices = ();
+    foreach my $id (keys %{$rh_bl}) {
+        my $ra_f1 = shift @{$rh_bl->{$id}};
+        HIT: foreach my $ra_fields (@{$rh_bl->{$id}}) {
+            next unless ($ra_fields->[1] =~ m/^aq/ || $ra_fields->[1] =~ m/^hm/
+                   || $ra_fields->[1] =~ m/^ml/ || $ra_fields->[1] =~ m/^nv/
+                   || $ra_fields->[1] =~ m/^ta/ || $ra_fields->[1] =~ m/^meta/);
+            my $diff = $ra_f1->[10] - $ra_fields->[10];                       
+            $ai_indices{$id} = $diff;
+            last HIT;
+        }
+    }
+    return \%ai_indices;
+}
+
+sub identify_potential_contams {
+}
+
+sub get_blast {
+    my $blast = shift;
+    my %data  = ();
+    my %not_contam  = ();
+    open IN, $blast or die "cannot open $blast:$!";
+    while (my $line = <IN>) {
+        chomp $line;
+        my @fields = split /\t/, $line;
+        next if ($not_contam{$fields[0]});
+        if (!$data{$fields[0]} && 
+                        ($fields[1] =~ m/^aq/ || $fields[1] =~ m/^hm/
+                         || $fields[1] =~ m/^ml/ || $fields[1] =~ m/^nv/
+                         || $fields[1] =~ m/^ta/ || $fields[1] =~ m/^meta/) ) {
+            $not_contam{$fields[0]}++;
+            next;
+        }
+        push @{$data{$fields[0]}}, \@fields;
+    }
+    return \%data;
+}
+
+sub usage {
+    die "usage: $0 --blast=BLASTREPORT [--version] [--help]\n";
+}
+
+sub process_options {
+    my $rh_opts = {};
+    $rh_opts->{'blast'} = '';
+    my $opt_results = Getopt::Long::GetOptions(
+                              'version' => \$rh_opts->{'version'},
+                              'blast=s' => \$rh_opts->{'blast'},
+                                 'help' => \$rh_opts->{'help'});
+    die "$VERSION\n" if ($rh_opts->{'version'});
+    pod2usage({-exitval => 0, -verbose => 2}) if $rh_opts->{'help'};
+    usage() unless ($rh_opts->{'blast'});
+    return $rh_opts;
+}
+
+__END__
+
+=head1 NAME
+
+B<alien_index> - identify non-animal sequence in animal transcriptomes
+
+=head1 AUTHOR
+
+Joseph F. Ryan <joseph.ryan@whitney.ufl.edu>
+
+=head1 SYNOPSIS
+
+=head1 OPTIONS
+
+=item B<--blast>
+
+BLAST report run with -outfmt 6 
+
+=item B<--help>
+
+Print this manual
+
+=item B<--version>
+
+Print the version. Overrides all other options.
+
+=back
+
+=head1 DESCRIPTION
+
+=head1 COPYRIGHT
+
+Copyright (C) 2014, Joseph F. Ryan
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+=cut
