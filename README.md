@@ -45,15 +45,17 @@ prerequisite
 usage
 =====
 
-   # these commands needs to be run only the first time you use the program
-   gzip -d alien_index_blastdb.0.01.fasta.gz
-   makeblastdb -dbtype prot -in alien_index_blastdb.0.01.fasta
+these commands needs to be run only the first time you use the program
 
-   blastx -query YOURTRANSCRIPTOME.fasta -outfmt 6 -max_target_seqs 1000 \
-     -seg yes -evalue 0.001 -db alien_index_blastdb.0.01.fasta \
-     -out BLASTREPORT 2> blastx.err
+```gzip -d alien_index_blastdb.0.01.fasta.gz
 
-   ./alien_index --blast=BLASTREPORT [--version] [--help]
+makeblastdb -dbtype prot -in alien_index_blastdb.0.01.fasta
+
+blastx -query YOURTRANSCRIPTOME.fasta -outfmt 6 -max_target_seqs 1000 \
+  -seg yes -evalue 0.001 -db alien_index_blastdb.0.01.fasta \
+  -out BLASTREPORT 2> blastx.err
+
+./alien_index --blast=BLASTREPORT [--version] [--help]```
 
 
 
