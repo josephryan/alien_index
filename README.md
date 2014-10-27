@@ -43,7 +43,7 @@ Gladyshev et al (2008) was describing horizontally transferred genes. Here is th
 And here is the description of the score itself described in the supplement of the same paper:
 
 > Alien Index (AI) as given by the formula AI = log((Best E-value for Metazoa)
-> + e-200) - log((Best E-value for Non- Metazoa) + e-200). If no hits were
+> \+ e-200) - log((Best E-value for Non- Metazoa) + e-200). If no hits were
 > found, the E-value was set to 1. Thus, AI is allowed to vary in the interval
 > between +460 and -460, being positive when top non-metazoan hits yielded
 > better E-values than the top metazoan ones. Entries with incomplete taxonomy,
