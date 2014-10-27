@@ -2,10 +2,13 @@ WARNING: alien_index is in very preliminary stages.  The interface may change. I
 
 WARNING: the alien_index_blastdb.0.01.fasta file is 5.4 gigabytes when uncompressed. You will need close to 20 gigabytes of free space for the fasta file and the blast databases
 
+NOTE: Version 0.01 and 0.02 do not properly handle sequences that have no hits
+to Metazoa
+
 alien_index
 ===========
 
-identify potential non-animal transcripts or horizontally transferred genes in animal transcriptomes 
+identify potential non-animal transcripts or horizontally transferred genes in animal transcriptomes. This script will eventually be adjusted to handle identification of alien sequences in other lineages besides animals.
 
 requires
 ========
@@ -36,6 +39,25 @@ Gladyshev et al (2008) was describing horizontally transferred genes. Here is th
 > bacterial, plant, or fungal clades (Fig. 2 and fig. S2A). Genes with
 > 0 < AI < 45 were designated indeterminate, because their phylogenetic
 > analysis may or may not confidently support a foreign origin."
+
+And here is the description of the score itself described in the supplement of the same paper:
+
+> Alien Index (AI) as given by the formula AI = log((Best E-value for Metazoa)
+> + e-200) - log((Best E-value for Non- Metazoa) + e-200). If no hits were
+> found, the E-value was set to 1. Thus, AI is allowed to vary in the interval
+> between +460 and -460, being positive when top non-metazoan hits yielded
+> better E-values than the top metazoan ones. Entries with incomplete taxonomy,
+> such as X-ray structures, or hits belonging to the same phylum as the query
+> sequence (i.e, Rotifera, Arthropoda or Nematoda), were excluded from the
+> analysis. The top four BLASTP hits were used to assign the consensus
+> taxonomic placement of each query sequence. Tables S1 and S3 summarize the
+> results of BLASTP searches. Based on AI, genes were classified as foreign
+> (AI ≥ 45), indeterminate (0<AI<45), or metazoan (AI ≤ 0). All sequences
+> coding for proteins composed of multiple repeated units (such as TPR, NHL,
+> FG-GAP, and Kelch repeats, found in all kingdoms) with AI ≥ 45 were
+> re-assigned to the indeterminate category, because their relative BLASTP
+> scores can vary significantly when minor changes in each repeat unit
+> propagate throughout the entire protein length.
 
 prerequisite
 ============

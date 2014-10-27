@@ -23,7 +23,7 @@ use Data::Dumper;
 # nv = Nematostella vectensis (Metazoa, Cnidaria)
 # ta = Trichoplax adhaerens (Metazoa, Placozoa)
 
-our $VERSION = 0.02;
+our $VERSION = 0.10;
 our $AUTHOR  = 'Joseph F. Ryan <joseph.ryan@whitney.ufl.edu>';
 
 MAIN: {
@@ -35,10 +35,20 @@ MAIN: {
 
 sub print_sorted_ai {
     my $rh_ai = shift;
-    foreach my $id (sort {$rh_ai->{$b} <=> $rh_ai->{$a}} 
+    print "ID\tAI\tbest E-Val\tbest metazoan E-val\n";
+    foreach my $id (sort {$rh_ai->{$b}->{'ai'} <=> $rh_ai->{$a}->{'ai'}} 
                     keys %{$rh_ai}) {
-        print "$id: $rh_ai->{$id}\n";
+        print "$id\t$rh_ai->{$id}->{'ai'}\t$rh_ai->{$id}->{'nonmet_eval'}\t";
+        print "$rh_ai->{$id}->{'met_eval'}\n";
     }
+}
+
+# formula from Gladyshev et al. 2008.
+sub calc_ai {
+    my $nm_val = shift;
+    my $m_val = shift;
+    my $ai = log(($m_val) + 1e-200) - log(($nm_val) + 1e-200);
+    return $ai;
 }
 
 sub get_alien_indices {
@@ -46,13 +56,24 @@ sub get_alien_indices {
     my %ai_indices = ();
     foreach my $id (keys %{$rh_bl}) {
         my $ra_f1 = shift @{$rh_bl->{$id}};
+        
         HIT: foreach my $ra_fields (@{$rh_bl->{$id}}) {
             next unless ($ra_fields->[1] =~ m/^aq/ || $ra_fields->[1] =~ m/^hm/
                    || $ra_fields->[1] =~ m/^ml/ || $ra_fields->[1] =~ m/^nv/
                    || $ra_fields->[1] =~ m/^ta/ || $ra_fields->[1] =~ m/^meta/);
-            my $diff = $ra_f1->[10] - $ra_fields->[10];                       
-            $ai_indices{$id} = $diff;
+#            my $diff = $ra_f1->[10] - $ra_fields->[10];                       
+#            $ai_indices{$id} = $diff;
+            my $ai = calc_ai($ra_f1->[10],$ra_fields->[10]);
+            $ai_indices{$id} = {'nonmet_eval' => $ra_f1->[10],
+                                'met_eval' => $ra_fields->[10],
+                                'ai' => $ai};
             last HIT;
+        }
+        unless ($ai_indices{$id}) {
+            my $ai = calc_ai($ra_f1->[10],1);
+            $ai_indices{$id} = {'nonmet_eval' => $ra_f1->[10],
+                                'met_eval' => 'no hits',
+                                'ai' => $ai};
         }
     }
     return \%ai_indices;
