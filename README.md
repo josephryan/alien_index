@@ -55,7 +55,8 @@ makeblastdb -dbtype prot -in alien_index_blastdb.0.01.fasta
 
 these commands are run for a typical alien_index analysis
 
-```blastx -query YOURTRANSCRIPTOME.fasta -outfmt 6 -max_target_seqs 1000 \
+```bash
+blastx -query YOURTRANSCRIPTOME.fasta -outfmt 6 -max_target_seqs 1000 \
   -seg yes -evalue 0.001 -db alien_index_blastdb.0.01.fasta \
   -out BLASTREPORT 2> blastx.err
 
