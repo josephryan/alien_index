@@ -82,7 +82,7 @@ blastx -query YOURTRANSCRIPTOME.fasta -outfmt 6 -max_target_seqs 1000 \
   -seg yes -evalue 0.001 -db alien_index_blastdb.0.01.fasta \
   -out BLASTREPORT 2> blastx.err
 
-./alien_index --blast=BLASTREPORT [--version] [--help]
+alien_index --blast=BLASTREPORT [--version] [--help]
 ```
 
 
