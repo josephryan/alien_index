@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/15686/josephryan/alien_index.svg)](https://zenodo.org/badge/latestdoi/15686/josephryan/alien_index)
+<a href="https://zenodo.org/badge/latestdoi/15686/josephryan/alien_index"><img src="https://zenodo.org/badge/15686/josephryan/alien_index.svg" alt="10.5281/zenodo.21029"></a>
 
 WARNING: the alien_index_blastdb.0.01.fasta file is 5.4 gigabytes when uncompressed. You will need close to 20 gigabytes of free space for the fasta file and the blast databases
 
