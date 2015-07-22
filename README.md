@@ -1,9 +1,6 @@
-WARNING: alien_index is in very preliminary stages.  The interface may change. It is quite simple though, and should work reliably. 
+[![DOI](https://zenodo.org/badge/15686/josephryan/alien_index.svg)](https://zenodo.org/badge/latestdoi/15686/josephryan/alien_index)
 
 WARNING: the alien_index_blastdb.0.01.fasta file is 5.4 gigabytes when uncompressed. You will need close to 20 gigabytes of free space for the fasta file and the blast databases
-
-NOTE: Version 0.01 and 0.02 do not properly handle sequences that have no hits
-to Metazoa
 
 alien_index
 ===========
