@@ -1,11 +1,13 @@
 <a href="https://zenodo.org/badge/latestdoi/15686/josephryan/alien_index"><img src="https://zenodo.org/badge/15686/josephryan/alien_index.svg" alt="10.5281/zenodo.21029"></a>
 
-WARNING: the alien_index_blastdb.0.01.fasta file is 5.4 gigabytes when uncompressed. You will need close to 20 gigabytes of free space for the fasta file and the blast databases
+Citation: Ryan, JF, 2014. Alien Index: identify potential non-animal transcripts or horizontally transferred genes in animal transcriptomes. DOI:http://dx.doi.org/10.5281/zenodo.21029
+
+WARNING: the alien_index_blastdb.0.01.fasta file is 5.4 gigabytes when uncompressed. You will need close to 20 gigabytes of free space for the fasta file and the blast databases. The BLAST step can take some time and can be optimized by dividing the query FASTA into multiple files and running multiple BLASTs on single cores.  See <a href="http://voorloopnul.com/blog/how-to-correctly-speed-up-blast-using-num_threads/">this post</a> for information on speeding up BLAST.
 
 alien_index
 ===========
 
-identify potential non-animal transcripts or horizontally transferred genes in animal transcriptomes. This script will eventually be adjusted to handle identification of alien sequences in other lineages besides animals.
+identify potential non-animal transcripts or horizontally transferred genes in animal transcriptomes.
 
 requires
 ========
