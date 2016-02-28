@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!perl
 
 use strict;
 use warnings; 
@@ -6,40 +6,28 @@ use Getopt::Long;
 use Pod::Usage;
 use Data::Dumper;
 
-# algorithm is based on alogorithm described in the following:
+# algorithm is based on algorithm described in the following:
 #  Gladyshev, Eugene A., Matthew Meselson, and Irina R. Arkhipova.
 #  "Massive horizontal gene transfer in bdelloid rotifers."
 #  science 320.5880 (2008): 1210-1213.
 
-# current prefixes in superblast.fa are:
-# arch, aq, bact, hm, meta, ml, nv, ta, nm_euk
-# arch = archae
-# bact = bacteria
-# nm_euk = non-metazoan eukaryote
-# meta = metazoan (includes Drosophila melanogaster, Mus musculus,  Homo sapiens, Anopholes gambiae, and more) 
-# aq = Amphimedon queenslandica (Metazoa, Porifera)
-# hm = Hydra magnipapillata (Metazoa, Cnidaria)
-# ml = Mnemiopsis leidyi (Metazoa, Ctenophora)
-# nv = Nematostella vectensis (Metazoa, Cnidaria)
-# ta = Trichoplax adhaerens (Metazoa, Placozoa)
-
-our $VERSION = 0.10;
+our $VERSION = 2.00;
 our $AUTHOR  = 'Joseph F. Ryan <joseph.ryan@whitney.ufl.edu>';
 
 MAIN: {
     my $rh_opts  = process_options();
-    my $rh_blast = get_blast($rh_opts->{'blast'});
-    my $rh_ai    = get_alien_indices($rh_blast);
+    my $rh_blast = get_blast($rh_opts->{'blast'},$rh_opts->{'alien_pattern'});
+    my $rh_ai    = get_alien_indices($rh_blast,$rh_opts->{'alien_pattern'});
     print_sorted_ai($rh_ai);
 }
 
 sub print_sorted_ai {
     my $rh_ai = shift;
-    print "ID\tAI\tbest E-Val\tbest metazoan E-val\n";
+    print "ID\tAI\tbest E-Val\tbest non-alien E-val\n";
     foreach my $id (sort {$rh_ai->{$b}->{'ai'} <=> $rh_ai->{$a}->{'ai'}} 
                     keys %{$rh_ai}) {
-        print "$id\t$rh_ai->{$id}->{'ai'}\t$rh_ai->{$id}->{'nonmet_eval'}\t";
-        print "$rh_ai->{$id}->{'met_eval'}\n";
+        print "$id\t$rh_ai->{$id}->{'ai'}\t$rh_ai->{$id}->{'alien_eval'}\t";
+        print "$rh_ai->{$id}->{'non_alien_eval'}\n";
     }
 }
 
@@ -53,37 +41,31 @@ sub calc_ai {
 
 sub get_alien_indices {
     my $rh_bl = shift;
+    my $alien_pattern = shift;
     my %ai_indices = ();
     foreach my $id (keys %{$rh_bl}) {
         my $ra_f1 = shift @{$rh_bl->{$id}};
-        
         HIT: foreach my $ra_fields (@{$rh_bl->{$id}}) {
-            next unless ($ra_fields->[1] =~ m/^aq/ || $ra_fields->[1] =~ m/^hm/
-                   || $ra_fields->[1] =~ m/^ml/ || $ra_fields->[1] =~ m/^nv/
-                   || $ra_fields->[1] =~ m/^ta/ || $ra_fields->[1] =~ m/^meta/);
-#            my $diff = $ra_f1->[10] - $ra_fields->[10];                       
-#            $ai_indices{$id} = $diff;
+            next if ($ra_fields->[1] =~ m/$alien_pattern/);
             my $ai = calc_ai($ra_f1->[10],$ra_fields->[10]);
-            $ai_indices{$id} = {'nonmet_eval' => $ra_f1->[10],
-                                'met_eval' => $ra_fields->[10],
+            $ai_indices{$id} = {'alien_eval' => $ra_f1->[10],
+                                'non_alien_eval' => $ra_fields->[10],
                                 'ai' => $ai};
             last HIT;
         }
         unless ($ai_indices{$id}) {
             my $ai = calc_ai($ra_f1->[10],1);
-            $ai_indices{$id} = {'nonmet_eval' => $ra_f1->[10],
-                                'met_eval' => 'no hits',
+            $ai_indices{$id} = {'alien_eval' => $ra_f1->[10],
+                                'non_alien_eval' => 'no hits',
                                 'ai' => $ai};
         }
     }
     return \%ai_indices;
 }
 
-sub identify_potential_contams {
-}
-
 sub get_blast {
     my $blast = shift;
+    my $alien_pattern = shift;
     my %data  = ();
     my %not_contam  = ();
     open IN, $blast or die "cannot open $blast:$!";
@@ -91,10 +73,7 @@ sub get_blast {
         chomp $line;
         my @fields = split /\t/, $line;
         next if ($not_contam{$fields[0]});
-        if (!$data{$fields[0]} && 
-                        ($fields[1] =~ m/^aq/ || $fields[1] =~ m/^hm/
-                         || $fields[1] =~ m/^ml/ || $fields[1] =~ m/^nv/
-                         || $fields[1] =~ m/^ta/ || $fields[1] =~ m/^meta/) ) {
+        if (!$data{$fields[0]} && ($fields[1] !~ m/$alien_pattern/) ) {
             $not_contam{$fields[0]}++;
             next;
         }
@@ -104,7 +83,7 @@ sub get_blast {
 }
 
 sub usage {
-    die "usage: $0 --blast=BLASTREPORT [--version] [--help]\n";
+    die "usage: $0 --blast=BLASTREPORT --alien_pattern=PATTERN_IN_ALIEN_DEFLINES [--version] [--help]\n";
 }
 
 sub process_options {
@@ -112,6 +91,7 @@ sub process_options {
     $rh_opts->{'blast'} = '';
     my $opt_results = Getopt::Long::GetOptions(
                               'version' => \$rh_opts->{'version'},
+                      'alien_pattern=s' => \$rh_opts->{'alien_pattern'},
                               'blast=s' => \$rh_opts->{'blast'},
                                  'help' => \$rh_opts->{'help'});
     die "$VERSION\n" if ($rh_opts->{'version'});
@@ -138,6 +118,10 @@ Joseph F. Ryan <joseph.ryan@whitney.ufl.edu>
 
 BLAST report run with -outfmt 6 
 
+=item B<--alien_pattern>
+
+a pattern that appears in 
+
 =item B<--help>
 
 Print this manual
@@ -150,9 +134,33 @@ Print the version. Overrides all other options.
 
 =head1 DESCRIPTION
 
+Generates a measure (alien index) which measures by how many orders of magnitude the BLAST E-value for the best non-alien hit differs from that for the best alien hit.  Examples of non-alien and alien are: (metazoan and non-metazoan; plant and non-plant; non-nematodes and nematodes--if for example you expected nematode contamination).
+
+=head1 STEP-BY-STEP
+
+1. Create a FASTA database of non-alien sequences (e.g., representative animal protein sequences) (NOTE: nucleotide sequences would work too)
+
+2. Create a FASTA database of alien sequences (e.g., representative non-animal protein sequences; e.g., bacteria, non-metazoan euks, archae)
+
+3. Add unique code to definition line of all alien sequences. For example:
+   perl -pi -e 's/^>/>ALIEN_/' alien.fa
+
+4. Make sure that your unique code is not found in your non-alien fasta
+   grep '^>' non_alien.fa | grep ALIEN_
+
+5. create BLAST database. For example:
+   cat non_alien.fa alien.fa > ai.fa
+   makeblastdb -dbtype prot -in ai.fa 
+
+6. BLAST query sequences (e.g., transcriptome) against combined db. Be sure to use -outfmt 6 (tabbed). For example:
+   blastx -query myseqs.fa -db ai.fa -outfmt 6 -out myseqs_v_ai.blastx
+
+7. Run alien_index
+   alien_index --blast=myseqs_v_ai.blastx --alien_pattern=ALIEN_ > myseqs.alien_index
+
 =head1 COPYRIGHT
 
-Copyright (C) 2014, Joseph F. Ryan
+Copyright (C) 2016, Joseph F. Ryan
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
