@@ -1,0 +1,10 @@
+LICENSE
+MANIFEST
+Makefile.PL
+README.md
+alien_index
+example/00-README
+example/alien.fa
+example/myseqs.fa
+example/myseqs_v_ai.blastx
+example/non_alien.fa
