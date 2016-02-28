@@ -2,18 +2,54 @@
 
 Citation: Ryan, JF, 2014. Alien Index: identify potential non-animal transcripts or horizontally transferred genes in animal transcriptomes. DOI:http://dx.doi.org/10.5281/zenodo.21029
 
-WARNING: the alien_index_blastdb.0.01.fasta file is 5.4 gigabytes when uncompressed. You will need close to 20 gigabytes of free space for the fasta file and the blast databases. The BLAST step can take some time and can be optimized by dividing the query FASTA into multiple files and running multiple BLASTs on single cores.  See <a href="http://voorloopnul.com/blog/how-to-correctly-speed-up-blast-using-num_threads/">this post</a> for information on speeding up BLAST.
-
 alien_index
 ===========
 
-identify potential non-animal transcripts or horizontally transferred genes in animal transcriptomes.
+identify potential alien transcripts or horizontally transferred genes in transcriptomes.
 
-requires
-========
+install
+=====
+To install `sowhat` and documentation, type the following:
 
-alien_index BLAST database  
-http://ryanlab.whitney.ufl.edu/downloads/alien_index/
+    perl Makefile.PL
+    make
+    sudo make install
+
+To install without root privelages try:
+
+    perl Makefile.PL PREFIX=/home/myuser/scripts
+    make
+    make install
+
+
+howto guide
+=====
+
+1. Create a FASTA database of non-alien sequences (e.g., representative animal protein sequences) (NOTE: nucleotide sequences would work too)
+
+2. Create a FASTA database of alien sequences (e.g., representative non-animal protein sequences; e.g., bacteria, non-metazoan euks, archae)
+
+3. Add unique code to definition line of all alien sequences. For
+       example:
+
+    perl -pi -e 's/^>/>ALIEN_/' alien.fa
+
+4. Make sure that your unique code is not found in your non-alien fasta
+
+    grep '^>' non_alien.fa | grep ALIEN_
+
+5. create BLAST database. For example:
+
+    cat non_alien.fa alien.fa > ai.fa
+    makeblastdb -dbtype prot -in ai.fa
+
+6. BLAST query sequences (e.g., transcriptome) against combined db. Be sure to use -outfmt 6 (tabbed). For example:
+
+    blastx -query myseqs.fa -db ai.fa -outfmt 6 -out myseqs_v_ai.blastx
+
+7. Run alien_index
+
+    alien_index --blast=myseqs_v_ai.blastx --alien_pattern=ALIEN_ > myseqs.alien_index
 
 algorithm
 =========
@@ -62,27 +98,6 @@ prerequisite
 ============
 
     BLAST+
-
-usage
-=====
-
-these commands needs to be run only the first time you use the program
-
-```bash
-gzip -d alien_index_blastdb.0.01.fasta.gz
-
-makeblastdb -dbtype prot -in alien_index_blastdb.0.01.fasta
-```
-
-these commands are run for a typical alien_index analysis
-
-```bash
-blastx -query YOURTRANSCRIPTOME.fasta -outfmt 6 -max_target_seqs 1000 \
-  -seg yes -evalue 0.001 -db alien_index_blastdb.0.01.fasta \
-  -out BLASTREPORT 2> blastx.err
-
-alien_index --blast=BLASTREPORT [--version] [--help]
-```
 
 
 
