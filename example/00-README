@@ -1,0 +1,17 @@
+# A small test/example
+
+perl -pi -e 's/^>/>ALIEN_/' alien.fa
+
+grep '^>' non_alien.fa | grep ALIEN_
+
+cat non_alien.fa alien.fa > ai.fa
+
+makeblastdb -dbtype prot -in ai.fa
+
+blastx -query myseqs.fa -db ai.fa -outfmt 6 -out myseqs_v_ai.blastx
+
+alien_index --blast=myseqs_v_ai.blastx --alien_pattern=ALIEN_
+
+# OUTPUT SHOULD LOOK LIKE:
+ID	AI	best E-Val	best non-alien E-val
+fern_contam	132.058280516877	8e-59	0.18
