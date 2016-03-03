@@ -34,15 +34,15 @@ howto guide
 3. Add unique code to definition line of all alien sequences. For
        example:
 
-    perl -pi -e 's/^>/>ALIEN_/' alien.fa
+    perl -pi -e 's/^>/>ALIEN_/' non_meta.fa
 
 4. Make sure that your unique code is not found in your non-alien fasta
 
-    grep '^>' non_alien.fa | grep ALIEN_
+    grep '^>' meta.fa | grep ALIEN_
 
 5. create BLAST database. For example:
 
-    cat non_alien.fa alien.fa > ai.fa
+    cat non_meta.fa meta.fa > ai.fa
     makeblastdb -dbtype prot -in ai.fa
 
 6. BLAST query sequences (e.g., transcriptome) against combined db. Be sure to use -outfmt 6 (tabbed). For example:
