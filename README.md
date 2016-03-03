@@ -26,8 +26,10 @@ howto guide
 =====
 
 1. Create a FASTA database of non-alien sequences (e.g., representative animal protein sequences) (NOTE: nucleotide sequences would work too)
+    * an example database (meta.fa.gz) is available here: http://ryanlab.whitney.ufl.edu/downloads/alien_index/
 
 2. Create a FASTA database of alien sequences (e.g., representative non-animal protein sequences; e.g., bacteria, non-metazoan euks, archae)
+    * an example database (non_meta.fa.gz) is available here: http://ryanlab.whitney.ufl.edu/downloads/alien_index/
 
 3. Add unique code to definition line of all alien sequences. For
        example:
