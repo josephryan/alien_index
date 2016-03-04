@@ -43,6 +43,7 @@ howto guide
 5. create BLAST database. For example:
 
     cat non_meta.fa meta.fa > ai.fa
+    
     makeblastdb -dbtype prot -in ai.fa
 
 6. BLAST query sequences (e.g., transcriptome) against combined db. Be sure to use -outfmt 6 (tabbed). For example:
