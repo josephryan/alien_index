@@ -139,24 +139,33 @@ Generates a measure (alien index) which measures by how many orders of magnitude
 =head1 STEP-BY-STEP
 
 1. Create a FASTA database of non-alien sequences (e.g., representative animal protein sequences) (NOTE: nucleotide sequences would work too)
+    * an example database (meta.fa.gz) is available here: http://ryanlab.whitney.ufl.edu/downloads/alien_index/
 
 2. Create a FASTA database of alien sequences (e.g., representative non-animal protein sequences; e.g., bacteria, non-metazoan euks, archae)
+    * an example database (non_meta.fa.gz) is available here: http://ryanlab.whitney.ufl.edu/downloads/alien_index/
 
-3. Add unique code to definition line of all alien sequences. For example:
-   perl -pi -e 's/^>/>ALIEN_/' alien.fa
+3. Add unique code to definition line of all alien sequences. For
+       example:
+
+    perl -pi -e 's/^>/>ALIEN_/' non_meta.fa
 
 4. Make sure that your unique code is not found in your non-alien fasta
-   grep '^>' non_alien.fa | grep ALIEN_
+
+    grep '^>' meta.fa | grep ALIEN_
 
 5. create BLAST database. For example:
-   cat non_alien.fa alien.fa > ai.fa
-   makeblastdb -dbtype prot -in ai.fa 
+
+    cat non_meta.fa meta.fa > ai.fa
+    
+    makeblastdb -dbtype prot -in ai.fa
 
 6. BLAST query sequences (e.g., transcriptome) against combined db. Be sure to use -outfmt 6 (tabbed). For example:
-   blastx -query myseqs.fa -db ai.fa -outfmt 6 -out myseqs_v_ai.blastx
+
+    blastx -query myseqs.fa -db ai.fa -outfmt 6 -max_target_seqs 1000 -seg yes -evalue 0.001 -out myseqs_v_ai.blastx
 
 7. Run alien_index
-   alien_index --blast=myseqs_v_ai.blastx --alien_pattern=ALIEN_ > myseqs.alien_index
+
+    alien_index --blast=myseqs_v_ai.blastx --alien_pattern=ALIEN_ > myseqs.alien_index
 
 =head1 COPYRIGHT
 
