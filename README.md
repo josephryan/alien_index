@@ -5,7 +5,7 @@ Citation: Ryan, JF, 2014. Alien Index: identify potential non-animal transcripts
 alien_index
 ===========
 
-identify potential alien transcripts or horizontally transferred genes in transcriptomes.
+identify potential contaminants or horizontally transferred genes in transcriptomes.
 
 install
 =====
@@ -20,6 +20,11 @@ To install without root privelages try:
     perl Makefile.PL PREFIX=/home/myuser/scripts
     make
     make install
+
+prerequisite
+============
+
+    BLAST+  (BLAST+ programs are not used directly by alien_index, but you will need it to create input files to be processed by alien_index)
 
 
 howto guide
@@ -97,10 +102,6 @@ And here is the description of the score itself described in the supplement of t
 > scores can vary significantly when minor changes in each repeat unit
 > propagate throughout the entire protein length.
 
-prerequisite
-============
-
-    BLAST+
 
 
 
