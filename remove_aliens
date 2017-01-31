@@ -1,0 +1,94 @@
+#!perl
+
+use strict;
+use warnings;
+use JFR::Fasta;
+use Data::Dumper;
+
+our $VERSION = 0.01;
+
+MAIN: {
+    my $ai = $ARGV[0] or die "usage: $0 AI FASTA\n";
+    my $fa = $ARGV[1] or die "usage: $0 AI FASTA\n";
+    my $rh_ai = get_ai($ai);
+    print_seqs($rh_ai,$fa);
+}
+
+sub print_seqs {
+    my $rh_ai = shift;
+    my $fa = shift;
+    my $skip = 0;
+    my $fp = JFR::Fasta->new($fa);
+    while (my $rec = $fp->get_record()) {
+        my $id = JFR::Fasta->get_def_w_o_gt($rec->{'def'});
+        $skip++ if ($rh_ai->{$id});
+        next if ($rh_ai->{$id});
+        print "$rec->{'def'}\n$rec->{'seq'}\n";
+    }
+    my $expect_skip = scalar(keys(%{$rh_ai}));
+    unless ($skip == $expect_skip) {
+        die "error: expected to filter $expect_skip seqs, but filtered $skip\n";
+    }
+}
+
+sub get_ai {
+    my $file = shift;
+    my %ai = ();
+    open IN, $file or die "cannot open $file:$!";
+    my $header = <IN>;
+    while (my $line = <IN>) {
+        my @fields = split /\t/, $line;
+        $ai{$fields[0]}++;
+    }
+    return \%ai;
+}
+
+__END__
+
+=head1 NAME
+
+B<remove_aliens> - remove sequences identified by an alien_index run
+
+=head1 AUTHOR
+
+Joseph F. Ryan <joseph.ryan@whitney.ufl.edu>
+
+=head1 SYNOPSIS
+
+remove_aliens AI FASTA
+
+=head1 OPTIONS
+
+=over
+
+=item AI
+
+output of alien_index
+
+=item FASTA
+
+fasta file used to run alien_index
+
+=back
+
+=head1 DESCRIPTION
+
+Removes sequences identified by alien_index.
+
+NOTE: The current version removes all sequences in the alien_index
+file and does not have the ability to adjust the cutoff.  We use
+this mostly for removing potential contaminants and genes that are potentially 
+horizontally transferred (HGTs).  
+
+=head1 COPYRIGHT
+
+Copyright (C) 2017, Joseph F. Ryan
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+=cut
+
