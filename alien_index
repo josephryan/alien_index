@@ -11,7 +11,7 @@ use Data::Dumper;
 #  "Massive horizontal gene transfer in bdelloid rotifers."
 #  science 320.5880 (2008): 1210-1213.
 
-our $VERSION = 2.00;
+our $VERSION = 2.01;
 our $AUTHOR  = 'Joseph F. Ryan <joseph.ryan@whitney.ufl.edu>';
 
 MAIN: {
@@ -112,7 +112,11 @@ Joseph F. Ryan <joseph.ryan@whitney.ufl.edu>
 
 =head1 SYNOPSIS
 
+alien_index --blast=BLASTREPORT --alien_pattern=PATTERN_IN_ALIEN_DEFLINES [--version] [--help]
+
 =head1 OPTIONS
+
+=over
 
 =item B<--blast>
 
