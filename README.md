@@ -61,7 +61,7 @@ howto guide
 
     alien_index --blast=myseqs_v_ai.blastx --alien_pattern=ALIEN_ > myseqs.alien_index
 
-8. OPTIONAL: If you want to create a FASTA file that has all sequences that have an entry in your alien_index output file run the following:
+8. OPTIONAL: If you want to create a FASTA file with all sequences that have an entry in your alien_index output file removed, run the following:
 
     remove_aliens myseqs.alien_index myseqs.fa > myseqs_without_aliens.fa
 
