@@ -26,6 +26,8 @@ prerequisite
 
     BLAST+  (BLAST+ programs are not used directly by alien_index, but you will need it to create input files to be processed by alien_index)
 
+    JFR-PerlModules (https://github.com/josephryan/JFR-PerlModules) 
+    only needed for the remove_aliens script (not for alien_index)
 
 howto guide
 =====
@@ -58,6 +60,10 @@ howto guide
 7. Run alien_index
 
     alien_index --blast=myseqs_v_ai.blastx --alien_pattern=ALIEN_ > myseqs.alien_index
+
+8. OPTIONAL: If you want to create a FASTA file that has all sequences that have an entry in your alien_index output file run the following:
+
+    remove_aliens myseqs.alien_index myseqs.fa > myseqs_without_aliens.fa
 
 algorithm
 =========
