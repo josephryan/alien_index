@@ -9,7 +9,7 @@ identify potential contaminants or horizontally transferred genes in transcripto
 
 install
 =====
-To install `sowhat` and documentation, type the following:
+To install `alien_index` and documentation, type the following:
 
     perl Makefile.PL
     make
