@@ -5,7 +5,7 @@ use warnings;
 use JFR::Fasta;
 use Data::Dumper;
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 MAIN: {
     my $ai = $ARGV[0] or die "usage: $0 AI FASTA\n";
@@ -21,6 +21,8 @@ sub print_seqs {
     my $fp = JFR::Fasta->new($fa);
     while (my $rec = $fp->get_record()) {
         my $id = JFR::Fasta->get_def_w_o_gt($rec->{'def'});
+        $id =~ s/^\s+//;
+        $id =~ s/\s+.*//;  # BLAST removes everything after the first space
         $skip++ if ($rh_ai->{$id});
         next if ($rh_ai->{$id});
         print "$rec->{'def'}\n$rec->{'seq'}\n";
