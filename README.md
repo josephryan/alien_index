@@ -55,7 +55,7 @@ howto guide
 
 6. BLAST query sequences (e.g., transcriptome) against combined db. Be sure to use -outfmt 6 (tabbed). For example:
 
-    blastx -query myseqs.fa -db ai.fa -outfmt 6 -max_target_seqs 1000 -seg yes -evalue 0.001 -out myseqs_v_ai.blastx
+    blastx -query myseqs.fa -db ai.fa -outfmt 6 -seg yes -evalue 0.001 -out myseqs_v_ai.blastx
 
 7. Run alien_index
 
