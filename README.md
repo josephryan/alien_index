@@ -109,5 +109,102 @@ And here is the description of the score itself described in the supplement of t
 > propagate throughout the entire protein length.
 
 
+# Embedded Documentation (POD2MARKDOWN)
 
+# NAME
 
+**alien\_index** - identify non-animal sequence in animal transcriptomes
+
+# AUTHOR
+
+Joseph F. Ryan <joseph.ryan@whitney.ufl.edu>
+
+# SYNOPSIS
+
+alien\_index --blast=BLASTREPORT --alien\_pattern=PATTERN\_IN\_ALIEN\_DEFLINES \[--long\_output\] \[--version\] \[--help\]
+
+# OPTIONS
+
+- **--blast**
+
+    BLAST report run with -outfmt 6 
+
+- **--alien\_pattern**
+
+    a pattern that appears in 
+
+- **--long\_output**
+
+    output will contain all blast info from the best alien BLAST high scoring pair (blast tab output begins with A e.g. "Aevalue") and best non-alien BLAST high scoring pair (blast tab output begins with NA e.g. "NAqstart")
+     1.	 qseqid 	 query (e.g., unknown gene) sequence id
+     2. 	 sseqid 	 subject (e.g., reference genome) sequence id
+     3. 	 pident 	 percentage of identical matches
+     4. 	 length 	 alignment length (sequence overlap)
+     5. 	 mismatch 	 number of mismatches
+     6. 	 gapopen 	 number of gap openings
+     7. 	 qstart 	 start of alignment in query
+     8. 	 qend 	 end of alignment in query
+     9. 	 sstart 	 start of alignment in subject
+     10. 	 send 	 end of alignment in subject
+     11. 	 evalue 	 expect value
+     12. 	 bitscore 	 bit score
+
+- **--help**
+
+    Print this manual
+
+- **--version**
+
+    Print the version. Overrides all other options.
+
+# DESCRIPTION
+
+Generates a measure (alien index) which measures by how many orders of magnitude the BLAST E-value for the best non-alien hit differs from that for the best alien hit.  Examples of non-alien and alien are: (metazoan and non-metazoan; plant and non-plant; non-nematodes and nematodes--if for example you expected nematode contamination).
+
+# STEP-BY-STEP
+
+1\. Create a FASTA database of non-alien sequences (e.g., representative animal protein sequences) (NOTE: nucleotide sequences would work too)
+    \* an example database (meta.fa.gz) is available here: http://ryanlab.whitney.ufl.edu/downloads/alien\_index/
+
+2\. Create a FASTA database of alien sequences (e.g., representative non-animal protein sequences; e.g., bacteria, non-metazoan euks, archae)
+    \* an example database (non\_meta.fa.gz) is available here: http://ryanlab.whitney.ufl.edu/downloads/alien\_index/
+
+3\. Add unique code to definition line of all alien sequences. For
+       example:
+
+    perl -pi -e 's/^>/>ALIEN_/' non_meta.fa
+
+4\. Make sure that your unique code is not found in your non-alien fasta
+
+    grep '^>' meta.fa | grep ALIEN_
+
+5\. create BLAST database. For example:
+
+    cat non_meta.fa meta.fa > ai.fa
+    
+    makeblastdb -dbtype prot -in ai.fa
+
+6\. BLAST query sequences (e.g., transcriptome) against combined db. Be sure to use -outfmt 6 (tabbed). For example:
+
+    blastx -query myseqs.fa -db ai.fa -outfmt 6 -max_target_seqs 1000 -seg yes -evalue 0.001 -out myseqs_v_ai.blastx
+
+7\. Run alien\_index
+
+    alien_index --blast=myseqs_v_ai.blastx --alien_pattern=ALIEN_ > myseqs.alien_index
+
+# COPYRIGHT
+
+Copyright (C) 2016-2020, Joseph F. Ryan
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see &lt;http://www.gnu.org/licenses/>.
