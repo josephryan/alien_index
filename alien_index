@@ -11,23 +11,28 @@ use Data::Dumper;
 #  "Massive horizontal gene transfer in bdelloid rotifers."
 #  science 320.5880 (2008): 1210-1213.
 
-our $VERSION = 2.01;
+our $VERSION = 2.1;
 our $AUTHOR  = 'Joseph F. Ryan <joseph.ryan@whitney.ufl.edu>';
 
 MAIN: {
     my $rh_opts  = process_options();
     my $rh_blast = get_blast($rh_opts->{'blast'},$rh_opts->{'alien_pattern'});
     my $rh_ai    = get_alien_indices($rh_blast,$rh_opts->{'alien_pattern'});
-    print_sorted_ai($rh_ai);
+    print_sorted_ai($rh_opts,$rh_ai);
 }
 
 sub print_sorted_ai {
+    my $rh_o  = shift;
     my $rh_ai = shift;
-    print "ID\tAI\tbest E-Val\tbest non-alien E-val\n";
+    print "ID\tAI\tbest E-Val\tbest non-alien E-val\tAqseqid\tAsseqid\tApident\tAlength\tAmismatch\tAgapopen\tAqstart\tAqend\tAsstart\tAsend\tAevalue\tAbitscore\tNAqseqid\tNAsseqid\tNApident\tNAlength\tNAmismatch\tNAgapopen\tNAqstart\tNAqend\tNAsstart\tNAsend\tNAevalue\tNAbitscore\n";
     foreach my $id (sort {$rh_ai->{$b}->{'ai'} <=> $rh_ai->{$a}->{'ai'}} 
                     keys %{$rh_ai}) {
-        print "$id\t$rh_ai->{$id}->{'ai'}\t$rh_ai->{$id}->{'alien_eval'}\t";
-        print "$rh_ai->{$id}->{'non_alien_eval'}\n";
+        if ($rh_o->{'long_output'}) {    
+            print "$id\t$rh_ai->{$id}->{'ai'}\t$rh_ai->{$id}->{'alien_eval'}\t";
+            print "$rh_ai->{$id}->{'non_alien_eval'}\t$rh_ai->{$id}->{'alien_blast'}\t$rh_ai->{$id}->{'non_alien_blast'}\n";
+        } else {
+            print "$id\t$rh_ai->{$id}->{'ai'}\t$rh_ai->{$id}->{'alien_eval'}\n";
+        }
     }
 }
 
@@ -45,10 +50,15 @@ sub get_alien_indices {
     my %ai_indices = ();
     foreach my $id (keys %{$rh_bl}) {
         my $ra_f1 = shift @{$rh_bl->{$id}};
+        my $alien_blast = join "\t", @{$ra_f1};
+        my $non_alien_blast = "-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-";
         HIT: foreach my $ra_fields (@{$rh_bl->{$id}}) {
             next if ($ra_fields->[1] =~ m/$alien_pattern/);
             my $ai = calc_ai($ra_f1->[10],$ra_fields->[10]);
+            $non_alien_blast = join "\t", @{$ra_fields};
             $ai_indices{$id} = {'alien_eval' => $ra_f1->[10],
+                                'alien_blast' => $alien_blast,
+                                'non_alien_blast' => $non_alien_blast,
                                 'non_alien_eval' => $ra_fields->[10],
                                 'ai' => $ai};
             last HIT;
@@ -56,6 +66,8 @@ sub get_alien_indices {
         unless ($ai_indices{$id}) {
             my $ai = calc_ai($ra_f1->[10],1);
             $ai_indices{$id} = {'alien_eval' => $ra_f1->[10],
+                                'alien_blast' => $alien_blast,
+                                'non_alien_blast' => $non_alien_blast,
                                 'non_alien_eval' => 'no hits',
                                 'ai' => $ai};
         }
@@ -83,7 +95,7 @@ sub get_blast {
 }
 
 sub usage {
-    die "usage: $0 --blast=BLASTREPORT --alien_pattern=PATTERN_IN_ALIEN_DEFLINES [--version] [--help]\n";
+    die "usage: $0 --blast=BLASTREPORT --alien_pattern=PATTERN_IN_ALIEN_DEFLINES [--long_output] [--version] [--help]\n";
 }
 
 sub process_options {
@@ -93,6 +105,7 @@ sub process_options {
                               'version' => \$rh_opts->{'version'},
                       'alien_pattern=s' => \$rh_opts->{'alien_pattern'},
                               'blast=s' => \$rh_opts->{'blast'},
+                          'long_output' => \$rh_opts->{'long_output'},
                                  'help' => \$rh_opts->{'help'});
     die "$VERSION\n" if ($rh_opts->{'version'});
     pod2usage({-exitval => 0, -verbose => 2}) if $rh_opts->{'help'};
@@ -112,7 +125,7 @@ Joseph F. Ryan <joseph.ryan@whitney.ufl.edu>
 
 =head1 SYNOPSIS
 
-alien_index --blast=BLASTREPORT --alien_pattern=PATTERN_IN_ALIEN_DEFLINES [--version] [--help]
+alien_index --blast=BLASTREPORT --alien_pattern=PATTERN_IN_ALIEN_DEFLINES [--long_output] [--version] [--help]
 
 =head1 OPTIONS
 
@@ -125,6 +138,22 @@ BLAST report run with -outfmt 6
 =item B<--alien_pattern>
 
 a pattern that appears in 
+
+=item B<--long_output>
+
+output will contain all blast info from the best alien BLAST high scoring pair (blast tab output begins with A e.g. "Aevalue") and best non-alien BLAST high scoring pair (blast tab output begins with NA e.g. "NAqstart")
+ 1.	 qseqid 	 query (e.g., unknown gene) sequence id
+ 2. 	 sseqid 	 subject (e.g., reference genome) sequence id
+ 3. 	 pident 	 percentage of identical matches
+ 4. 	 length 	 alignment length (sequence overlap)
+ 5. 	 mismatch 	 number of mismatches
+ 6. 	 gapopen 	 number of gap openings
+ 7. 	 qstart 	 start of alignment in query
+ 8. 	 qend 	 end of alignment in query
+ 9. 	 sstart 	 start of alignment in subject
+ 10. 	 send 	 end of alignment in subject
+ 11. 	 evalue 	 expect value
+ 12. 	 bitscore 	 bit score
 
 =item B<--help>
 
